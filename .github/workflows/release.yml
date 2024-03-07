@@ -32,8 +32,8 @@ jobs:
       - name: Prepare working directories
         run: |
           mkdir src geosite-data
-          cp itdoginfo-domains/src/itdoginfo-Russia-inside.lst sources/itdoginfo-inside.lst
-          cp itdoginfo-domains/src/itdoginfo-Russia-outside.lst sources/itdoginfo-outside.lst
+          cp itdoginfo-domains/src/Russia-domains-inside.lst sources/itdoginfo-inside.lst
+          cp itdoginfo-domains/src/Russia-domains-outside.lst sources/itdoginfo-outside.lst
 
       - name: Download antifilter community domains list
         run: curl --location "$ANTIFILTER_URL" --output 'sources/antifilter-community.lst' --fail --no-progress-meter
