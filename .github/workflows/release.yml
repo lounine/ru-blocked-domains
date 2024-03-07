@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  ANTIFILTER_URL: https://community.antifilter.download/list/domains.lst
+  ANTIFILTER_URL: https://community.antifilter.download/listdomains.lst
 
 jobs:
   build:
@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: v2fly/domain-list-community
-          path: builder
+          path: geosite-builder
 
       - name: Checkout itdoginfo custom domain lists
         uses: actions/checkout@v4
@@ -23,9 +23,8 @@ jobs:
           repository: itdoginfo/allow-domains
           path: itdoginfo-domains
 
-      - name: Download
-        run: |
-          curl --location "$ANTIFILTER_URL" --output 'antifilter.lst' --fail --no-progress-meter
+      - name: Download antifilter community domains list
+        run: curl --location "$ANTIFILTER_URL" --output 'antifilter.lst' --fail --no-progress-meter
           
 
       
