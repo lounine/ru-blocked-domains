@@ -5,6 +5,8 @@ on:
 
 env:
   ANTIFILTER_URL: https://community.antifilter.download/list/domains.lst
+  TAG_NAME: $(date +%Y%m%d%H%M)
+  RELEASE_NAME: "Released at $(date '+%Y-%m-%d %H:%M')"
 
 jobs:
   build:
@@ -63,5 +65,6 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: $(date +%Y%m%d%H%M)
+          name: ${{ env.RELEASE_NAME }}
+          tag_name: ${{ env.TAG_NAME }}
           files: release/*
