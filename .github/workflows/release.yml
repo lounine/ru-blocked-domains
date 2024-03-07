@@ -3,6 +3,9 @@ name: Release Russia blocked domains lists
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 env:
   ANTIFILTER_URL: https://community.antifilter.download/list/domains.lst
   TAG_NAME: $(date +%Y%m%d%H%M)
