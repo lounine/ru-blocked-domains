@@ -13,6 +13,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Set variables
+        run: |
+          echo "RELEASE_NAME=Released on $(date '+%Y-%m-%d %H:%M')" >> $GITHUB_ENV
+          echo "TAG_NAME=$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
+          echo "ANTIFILTER_URL=https://community.antifilter.download/list/domains.lst" >> $GITHUB_ENV
+    
       - name: Checkout V2Ray/XRay domain list builder
         uses: actions/checkout@v4
         with:
