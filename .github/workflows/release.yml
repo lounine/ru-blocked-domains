@@ -31,7 +31,7 @@ jobs:
 
       - name: Prepare working directories
         run: |
-          mkdir src geosite-data
+          mkdir src geosite-data release
           cp itdoginfo-domains/src/Russia-domains-inside.lst src/itdoginfo-inside.lst
           cp itdoginfo-domains/src/Russia-domains-outside.lst src/itdoginfo-outside.lst
 
@@ -49,15 +49,18 @@ jobs:
 
       - name: Build V2Ray/XRay geosite file
         working-directory: geosite-builder
-        run: go run . -datapath '../geosite-data' --outputname 'ru-blocked.dat' --outputdir '..'
+        run: go run . -datapath '../geosite-data' --outputname 'ru-blocked.dat' --outputdir '../release'
 
       - name: Zip files
         run: |
-          zip -9 ru-blocked.dat.zip ru-blocked.dat
-          zip -9 --recurse-paths src.zip src/ geosite-data/
+          zip -9 --junk-paths release/ru-blocked.dat.zip release/ru-blocked.dat
+          zip -9 --recurse-paths release/src.zip src/ geosite-data/
 
       - name: Calculate checksums
-        run: |
-          sha256sum ru-blocked.dat > ru-blocked.dat.sha256sum
-          sha256sum ru-blocked.dat.zip > ru-blocked.dat.zip.sha256sum
-          sha256sum src.zip > src.zip.sha256sum
+        working-directory: release
+        run: for file in *; do sha256sum $file > $file.sha256sum; done
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/*
