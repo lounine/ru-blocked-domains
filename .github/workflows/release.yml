@@ -3,15 +3,14 @@ name: Release Russia blocked domains lists
 on:
   workflow_dispatch:
 
+env:
+  ANTIFILTER_URL: https://community.antifilter.download/list/domains.lst
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Set variables
-        run: |
-          echo "ANTIFILTER_URL=https://community.antifilter.download/list/domains.lst" >> $GITHUB_ENV
-          
+    steps:          
       - name: Checkout V2Ray/XRay domain list builder
         uses: actions/checkout@v4
         with:
