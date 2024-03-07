@@ -4,13 +4,16 @@ on:
   workflow_dispatch:
 
 env:
-  ANTIFILTER_URL: https://community.antifilter.download/listdomains.lst
+  ANTIFILTER_URL: https://community.antifilter.download/list/domains.lst
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    steps:          
+    steps:
+      - name: Prepare working directories
+        run: mkdir geosite-data antifilter-community
+        
       - name: Checkout V2Ray/XRay domain list builder
         uses: actions/checkout@v4
         with:
@@ -23,8 +26,25 @@ jobs:
           repository: itdoginfo/allow-domains
           path: itdoginfo-domains
 
-      - name: Download antifilter community domains list
-        run: curl --location "$ANTIFILTER_URL" --output 'antifilter.lst' --fail --no-progress-meter
-          
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: geosite-builder/go.mod
+          cache-dependency-path: geosite-builder/go.sum
 
-      
+      - name: Download antifilter community domains list
+        run: curl --location "$ANTIFILTER_URL" --output './antifilter-community/domains.lst' --fail --no-progress-meter
+
+      - name: Prepare V2Ray/XRay domain lists
+        run: |
+          cat antifilter-community/domains.lst | tee -a  >/dev/null \
+            geosite-data/antifilter-community geosite-data/all
+          cat itdoginfo-domains/src/itdoginfo-Russia-inside.lst | tee -a >/dev/null \
+            geosite-data/itdoginfo-inside geosite-data/all
+          cat itdoginfo-domains/src/itdoginfo-Russia-outside.lst | tee -a >/dev/null \
+            geosite-data/itdoginfo-outside geosite-data/all-outside
+
+      - name: Build V2Ray/XRay geosite file
+        working-directory: geosite-builder
+        run: |
+          go run . -datapath '../geosite-data' --outputname 'ru-blocked.dat' --outputdir '..'
