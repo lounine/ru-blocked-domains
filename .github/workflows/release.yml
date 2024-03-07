@@ -1,0 +1,32 @@
+name: Release Russia blocked domains lists
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set variables
+        run: |
+          echo "ANTIFILTER_URL=https://community.antifilter.download/list/domains.lst" >> $GITHUB_ENV
+          
+      - name: Checkout V2Ray/XRay domain list builder
+        uses: actions/checkout@v4
+        with:
+          repository: v2fly/domain-list-community
+          path: builder
+
+      - name: Checkout itdoginfo custom domain lists
+        uses: actions/checkout@v4
+        with:
+          repository: itdoginfo/allow-domains
+          path: itdoginfo-domains
+
+      - name: Download
+        run: |
+          curl --location "$ANTIFILTER_URL" --output 'antifilter.lst' --fail --no-progress-meter
+          
+
+      
