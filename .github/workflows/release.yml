@@ -11,9 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Prepare working directories
-        run: mkdir geosite-data antifilter-community
-        
       - name: Checkout V2Ray/XRay domain list builder
         uses: actions/checkout@v4
         with:
@@ -32,19 +29,35 @@ jobs:
           go-version-file: geosite-builder/go.mod
           cache-dependency-path: geosite-builder/go.sum
 
+      - name: Prepare working directories
+        run: |
+          mkdir src geosite-data
+          cp itdoginfo-domains/src/itdoginfo-Russia-inside.lst sources/itdoginfo-inside.lst
+          cp itdoginfo-domains/src/itdoginfo-Russia-outside.lst sources/itdoginfo-outside.lst
+
       - name: Download antifilter community domains list
-        run: curl --location "$ANTIFILTER_URL" --output './antifilter-community/domains.lst' --fail --no-progress-meter
+        run: curl --location "$ANTIFILTER_URL" --output 'sources/antifilter-community.lst' --fail --no-progress-meter
 
       - name: Prepare V2Ray/XRay domain lists
         run: |
-          cat antifilter-community/domains.lst | tee -a  >/dev/null \
+          cat src/antifilter-community.lst | tee -a  >/dev/null \
             geosite-data/antifilter-community geosite-data/all
-          cat itdoginfo-domains/src/itdoginfo-Russia-inside.lst | tee -a >/dev/null \
+          cat src/itdoginfo-inside.lst | tee -a >/dev/null \
             geosite-data/itdoginfo-inside geosite-data/all
-          cat itdoginfo-domains/src/itdoginfo-Russia-outside.lst | tee -a >/dev/null \
+          cat src/itdoginfo-outside.lst | tee -a >/dev/null \
             geosite-data/itdoginfo-outside geosite-data/all-outside
 
       - name: Build V2Ray/XRay geosite file
         working-directory: geosite-builder
+        run: go run . -datapath '../geosite-data' --outputname 'ru-blocked.dat' --outputdir '..'
+
+      - name: Zip files
         run: |
-          go run . -datapath '../geosite-data' --outputname 'ru-blocked.dat' --outputdir '..'
+          zip -9 ru-blocked.dat.zip ru-blocked.dat
+          zip -9 --recurse-paths src.zip src/ geosite-data/
+
+      - name: Calculate checksums
+        run: |
+          sha256sum ru-blocked.dat > ru-blocked.dat.sha256sum
+          sha256sum ru-blocked.dat.zip > ru-blocked.dat.zip.sha256sum
+          sha256sum src.zip > src.zip.sha256sum
