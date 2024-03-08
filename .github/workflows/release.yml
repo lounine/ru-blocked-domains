@@ -70,6 +70,7 @@ jobs:
       - name: Download latest release hashes
         uses: robinraju/release-downloader@v1.9
         with:
+          latest: true
           fileName: '*.sha256sum'
           out-file-path: release-latest
           
