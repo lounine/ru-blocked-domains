@@ -77,7 +77,7 @@ jobs:
       - name: Check for changes
         run: |
           ls -la release
-          ls -la repease-latest
+          ls -la release-latest
           
       - name: Release
         uses: softprops/action-gh-release@v1
