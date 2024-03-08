@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  ANTIFILTER_URL: https://community.antifilter.download/list/domains.ls
+  ANTIFILTER_URL: https://community.antifilter.download/list/domains.lst
 
 jobs:
   build:
