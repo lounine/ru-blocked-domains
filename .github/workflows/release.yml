@@ -3,24 +3,20 @@ name: Release Russia blocked domains lists
 on:
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 env:
-  ANTIFILTER_URL: https://community.antifilter.download/list/domains.lst
-  TAG_NAME: $(date +%Y%m%d%H%M)
-  RELEASE_NAME: "Released at $(date '+%Y-%m-%d %H:%M')"
+  ANTIFILTER_URL: https://community.antifilter.download/list/domains.ls
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Set variables
         run: |
           echo "RELEASE_NAME=Released on $(date '+%Y-%m-%d %H:%M')" >> $GITHUB_ENV
           echo "TAG_NAME=$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
-          echo "ANTIFILTER_URL=https://community.antifilter.download/list/domains.lst" >> $GITHUB_ENV
     
       - name: Checkout V2Ray/XRay domain list builder
         uses: actions/checkout@v4
@@ -65,12 +61,23 @@ jobs:
       - name: Zip files
         run: |
           zip -9 --junk-paths release/ru-blocked.dat.zip release/ru-blocked.dat
-          zip -9 --recurse-paths release/src.zip src/ geosite-data/
+          zip -9 --recurse-paths release/src-data.zip src/ geosite-data/
 
       - name: Calculate checksums
         working-directory: release
         run: for file in *; do sha256sum $file > $file.sha256sum; done
 
+      - name: Download latest release hashes
+        uses: robinraju/release-downloader@v1.9
+        with:
+          fileName: '*.sha256sum'
+          out-file-path: release-latest
+          
+      - name: Check for changes
+        run: |
+          ls -la release
+          ls -la repease-latest
+          
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
