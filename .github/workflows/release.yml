@@ -15,10 +15,10 @@ jobs:
       contents: write
 
     steps:
-      - name: Set variables
+      - name: Set variables when running on schedule
         run: |
-          echo "RELEASE_NAME=Released on $(date '+%Y-%m-%d %H:%M %Z')" >> $GITHUB_ENV
-          echo "TAG_NAME=$(date +%Y%m%d)" >> $GITHUB_ENV
+          echo "RELEASE_NAME=Released on $(date '+%Y-%m-%d')" >> $GITHUB_ENV
+          echo "TAG_NAME=$(date '+%Y%m%d')" >> $GITHUB_ENV
     
       - name: Checkout V2Ray/XRay domain list builder
         uses: actions/checkout@v4
@@ -95,4 +95,5 @@ jobs:
         with:
           name: ${{ env.RELEASE_NAME }}
           tag_name: ${{ env.TAG_NAME }}
+          body: ''
           files: release/*
