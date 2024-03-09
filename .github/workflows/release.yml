@@ -7,7 +7,7 @@ env:
   ANTIFILTER_URL: https://community.antifilter.download/list/domains.lst
 
 jobs:
-  build:
+  build-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -78,18 +78,17 @@ jobs:
         id: check-for-changes
         run: |
           for file in release/*.sha256sum; do
-            if ! cmp $file release-latest/$(basename $file)
-            then
-              echo "### Changes found, releasing! :rocket:" >> $GITHUB_STEP_SUMMARY
+            if ! cmp $file release-latest/$(basename $file)    ; then
+              echo "#### Changes found, releasing! :rocket:" | tee $GITHUB_STEP_SUMMARY
               echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
               exit 0
             fi
           done
-          echo "### No changes found, skipping release. :zzz:" >> $GITHUB_STEP_SUMMARY
+          echo "#### No changes found, skipping release. :zzz:" | tee $GITHUB_STEP_SUMMARY
           
       - name: Release
         if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: ${{ env.RELEASE_NAME }}
           tag_name: ${{ env.TAG_NAME }}
