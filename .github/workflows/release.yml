@@ -60,8 +60,8 @@ jobs:
 
       - name: Zip files
         run: |
-          zip -9 --junk-paths --no-extra release/ru-blocked.dat.zip release/ru-blocked.dat
-          zip -9 --recurse-paths --no-extra release/src-data.zip src/ geosite-data/
+          zip -9 -X --junk-paths release/ru-blocked.dat.zip release/ru-blocked.dat
+          zip -9 -X --recurse-paths release/src-data.zip src/ geosite-data/
 
       - name: Calculate checksums
         working-directory: release
