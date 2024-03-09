@@ -75,11 +75,20 @@ jobs:
           out-file-path: release-latest
           
       - name: Check for changes
+        id: check-for-changes
         run: |
-          ls -la release
-          ls -la release-latest
+          for file in release/*.sha256sum; do
+            cmp $file release-latest/$(basename $file)
+            if [ $? -ne 0 ]; then
+              echo "### Changes found, releasing! :rocket:" >> $GITHUB_STEP_SUMMARY
+              echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          done
+          echo "### No changes found, skipping release. :zzz:" >> $GITHUB_STEP_SUMMARY
           
       - name: Release
+        if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ env.RELEASE_NAME }}
