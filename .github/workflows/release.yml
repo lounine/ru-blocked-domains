@@ -12,7 +12,7 @@ jobs:
     permissions:
       contents: write
     outputs:
-      status: ${{ steps.release.conclusion }}
+      status: ${{ steps.release.outcome }}
 
     steps:
       - name: Set variables
