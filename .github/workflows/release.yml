@@ -88,6 +88,12 @@ jobs:
             fi
           done
           echo "#### No changes found, skipping release. :zzz:" >> $GITHUB_STEP_SUMMARY
+
+      - name: Prepare release notes
+        if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
+        run: |
+          echo -n "Всего уникальных имён сайтов: " >> RELEASE_NOTES
+          cat geosite-data/all | grep -v -e '^#' -e '^[[:space:]]*$' | sort | uniq | wc -l >> RELEASE_NOTES 
           
       - name: Release
         if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
@@ -95,5 +101,5 @@ jobs:
         with:
           name: ${{ env.RELEASE_NAME }}
           tag_name: ${{ env.TAG_NAME }}
-          body: 'tst'
+          body_path: RELEASE_NOTES
           files: release/*
