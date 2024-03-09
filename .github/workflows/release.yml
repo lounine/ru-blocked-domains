@@ -66,9 +66,8 @@ jobs:
           zip -9 --recurse-paths release/src-data.zip src/ geosite-data/
 
       - name: Calculate checksums
-        continue-on-error: true
         working-directory: release
-        run: for file in *; do sha1256sum $file > $file.sha256sum; done
+        run: for file in *; do sha256sum $file > $file.sha256sum; done
 
       - name: Download latest release hashes
         uses: robinraju/release-downloader@v1.9
