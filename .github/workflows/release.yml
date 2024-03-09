@@ -11,8 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    outputs:
-      status: ${{ steps.release.outcome }}
 
     steps:
       - name: Set variables
@@ -89,7 +87,6 @@ jobs:
           echo "#### No changes found, skipping release. :zzz:" >> $GITHUB_STEP_SUMMARY
           
       - name: Release
-        id: release
         if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
         uses: softprops/action-gh-release@v2
         with:
