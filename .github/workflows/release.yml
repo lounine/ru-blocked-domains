@@ -77,7 +77,7 @@ jobs:
       - name: Check for changes
         id: check-for-changes
         run: |
-          for file in release/*.sha256sum; do
+          for file in release/*.dat.sha256sum; do
             if ! cmp $file release-latest/$(basename $file)    ; then
               echo "#### Changes found, releasing! :rocket:" | tee $GITHUB_STEP_SUMMARY
               echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
