@@ -78,8 +78,8 @@ jobs:
         id: check-for-changes
         run: |
           for file in release/*.sha256sum; do
-            cmp $file release-latest/$(basename $file)
-            if [ $? -ne 0 ]; then
+            if ! cmp $file release-latest/$(basename $file)
+            then
               echo "### Changes found, releasing! :rocket:" >> $GITHUB_STEP_SUMMARY
               echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
               exit 0
