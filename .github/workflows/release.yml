@@ -2,6 +2,8 @@ name: Release Russia blocked domains lists
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 21 * * *"
 
 env:
   ANTIFILTER_URL: https://community.antifilter.download/list/domains.lst
