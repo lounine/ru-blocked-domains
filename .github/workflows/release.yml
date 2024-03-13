@@ -51,7 +51,7 @@ jobs:
 
       - name: Prepare V2Ray/XRay domain lists
         run: |
-          clean-up() { grep -v -e '^#' -e '^[[:space:]]*$' | sed 's/^www\.//' | sort | uniq }
+          clean-up() { grep -v -e '^#' -e '^[[:space:]]*$' | sed 's/^www\.//' | sort | uniq; }
           cat src/antifilter-community.lst  | clean-up > geosite-data/antifilter-community
           cat src/itdoginfo-inside.lst      | clean-up > geosite-data/itdoginfo-inside
           cat src/itdoginfo-outside.lst     | clean-up > geosite-data/itdoginfo-outside
