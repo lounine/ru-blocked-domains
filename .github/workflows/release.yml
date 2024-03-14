@@ -127,7 +127,7 @@ jobs:
               fi
               if (( $removed_count > 4 )); then
                 (echo "$removed" | head -n 3 | changes '\\- '; echo ', ...') | output
-              elif (( $removed_count > 0 )) 
+              elif (( $removed_count > 0 )); then
                 echo "$removed" | changes '\\- ' | output
               fi
             fi
@@ -139,13 +139,14 @@ jobs:
           added_count=$(comm -13 $prev_file $file | wc -w | tr -d ' ')
           removed_count=$(comm -23 $prev_file $file | wc -w | tr -d ' ')
 
-          (echo; echo -n "#### Total – $total_count sites (") | output
-          [[ $added_count > 0 ]] && echo -n "+$added_count" | output
-          [[ $added_count > 0 && $removed_count > 0 ]] && echo -n ' / ' | output
-          [[ $removed_count > 0 ]] && echo -n "-$removed_count" | output
-          echo ')' | output
-
-          cat geosite-data/all | wc -l | tr -d ' ' | output
+          (echo; echo -n "#### Total – $total_count sites") | output
+          if (( $added_count > 0 || $removed_count > 0 )); then
+            echo -n " (" | output
+            [[ $added_count > 0 ]] && echo -n "+$added_count" | output
+            [[ $added_count > 0 && $removed_count > 0 ]] && echo -n ', ' | output
+            [[ $removed_count > 0 ]] && echo -n "-$removed_count" | output
+            echo ')' | output
+          fi
           
       - name: Release
         if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
