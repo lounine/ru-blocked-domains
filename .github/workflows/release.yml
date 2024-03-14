@@ -112,19 +112,24 @@ jobs:
             removed=$(comm -23 $prev_file $cur_file)
             removed_count=$(echo "$removed" | wc -w | tr -d ' ')
 
-            if [[ $added_count > 0 || $removed_count > 0 ]]   ; then
-              (echo; echo -n "#### $name – $total_count sites (") | output
-              [[ $added_count > 0 ]] && echo -n "+$added_count" | output
-              [[ $added_count > 0 && $removed_count > 0 ]] && echo -n ', ' | output
-              [[ $removed_count > 0 ]] && echo -n "-$removed_count" | output
+            (echo; echo -n "#### $name – $total_count sites") | output
+            if (( $added_count > 0 || $removed_count > 0 )); then
+              echo -n " (" | output
+              (( $added_count > 0 )) && echo -n "+$added_count" | output
+              (( $added_count > 0 && $removed_count > 0 )) && echo -n ', ' | output
+              (( $removed_count > 0 )) && echo -n "-$removed_count" | output
               echo '):' | output
 
-              [[ $added_count > 4 ]] \
-                && (echo "$added" | head -n 3 | changes '\\+ '; echo ', ...') | output \
-                || echo "$added" | changes '\\+ ' | output
-              [[ $removed_count > 4 ]] \
-                && (echo "$removed" | head -n 3 | changes '\\- '; echo ', ...') | output \
-                || echo "$removed" | changes '\\- ' | output
+              if (( $added_count > 4 )); then
+                (echo "$added" | head -n 3 | changes '\\+ '; echo ', ...') | output
+              elif (( $added_count > 0 )); then
+                 echo "$added" | changes '\\+ ' | output
+              fi
+              if (( $removed_count > 4 )); then
+                (echo "$removed" | head -n 3 | changes '\\- '; echo ', ...') | output
+              elif (( $removed_count > 0 )) 
+                echo "$removed" | changes '\\- ' | output
+              fi
             fi
           done
 
