@@ -96,7 +96,7 @@ jobs:
         if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
         shell: bash
         run: |
-          changes() { sed -e "s/^/$1/" | tr '\n' ',' | sed -e 's/,$// ; s/,/, /g'; }
+          list() { tr '\n' ',' | sed -e 's/,$// ; s/,/, /g'; }
           output() { tee -a RELEASE_NOTES $GITHUB_STEP_SUMMARY; }
 
           (echo; echo '### Release notes:') >> $GITHUB_STEP_SUMMARY
@@ -112,23 +112,25 @@ jobs:
             removed=$(comm -23 $prev_file $cur_file)
             removed_count=$(echo "$removed" | wc -w | tr -d ' ')
 
-            (echo; echo -n "#### $name – $total_count sites") | output
+            (echo; echo -n "**$name – $total_count sites**") | output
             if (( $added_count > 0 || $removed_count > 0 )); then
-              echo -n " (" | output
+              echo -n " **(" | output
               (( $added_count > 0 )) && echo -n "+$added_count" | output
-              (( $added_count > 0 && $removed_count > 0 )) && echo -n ', ' | output
+              (( $added_count > 0 && $removed_count > 0 )) && echo -n ", " | output
               (( $removed_count > 0 )) && echo -n "-$removed_count" | output
-              echo '):' | output
+              echo "):**" | output
 
-              if (( $added_count > 4 )); then
-                (echo "$added" | head -n 3 | changes '\\+ '; echo ', ...') | output
-              elif (( $added_count > 0 )); then
-                 echo "$added" | changes '\\+ ' | output
+              if (( $added_count > 0 )); then
+                echo -n "+ "
+                (( $added_count > 4 )) \
+                  && (echo "$added" | head -n 3 | list; echo ", ...") | output \
+                  || echo "$added" | list | output
               fi
-              if (( $removed_count > 4 )); then
-                (echo "$removed" | head -n 3 | changes '\\- '; echo ', ...') | output
-              elif (( $removed_count > 0 )); then
-                echo "$removed" | changes '\\- ' | output
+              if (( $removed_count > 0 )); then
+                echo -n "- "
+                (( $removed_count > 4 )) \
+                  && (echo "$removed" | head -n 3 | list; echo ", ...") | output \
+                  || echo "$removed" | list | output
               fi
             fi
           done
@@ -139,13 +141,13 @@ jobs:
           added_count=$(comm -13 $prev_file $file | wc -w | tr -d ' ')
           removed_count=$(comm -23 $prev_file $file | wc -w | tr -d ' ')
 
-          (echo; echo -n "#### Total – $total_count sites") | output
+          (echo; echo -n "**Total – $total_count unique sites**") | output
           if (( $added_count > 0 || $removed_count > 0 )); then
-            echo -n " (" | output
+            echo -n " **(" | output
             [[ $added_count > 0 ]] && echo -n "+$added_count" | output
-            [[ $added_count > 0 && $removed_count > 0 ]] && echo -n ', ' | output
+            [[ $added_count > 0 && $removed_count > 0 ]] && echo -n ", " | output
             [[ $removed_count > 0 ]] && echo -n "-$removed_count" | output
-            echo ')' | output
+            echo ")**" | output
           fi
           
       - name: Release
