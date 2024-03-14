@@ -102,7 +102,7 @@ jobs:
 
           echo '\n### Release notes:' >> $GITHUB_STEP_SUMMARY
           (cd release-latest; unzip src-data.zip)
-          for cur_file in (GLOBIGNORE=*/all*; echo geosite-data/*); do
+          for cur_file in $(GLOBIGNORE=*/all*; echo geosite-data/*); do
             name=$(basename $cur_file)
             prev_file=release-latest/geosite-data/$name
             [ -f $prev_file ] || prev_file=/dev/null
