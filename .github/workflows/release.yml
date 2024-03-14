@@ -114,9 +114,9 @@ jobs:
             removed_count=$(echo $removed | wc -l | tr -d ' ')
 
             if [[ $added_count > 0 || $removed_count > 0 ]]   ; then
-              echo -n "\n#### $name total – $total_count (" | output
+              echo -n "\n#### $name – $total_count sites (" | output
               [[ $added_count > 0 ]] && echo -n "+$added_count" | output
-              [[ $added_count > 0 && $removed_count > 0 ]] && echo -n ' / ' | output
+              [[ $added_count > 0 && $removed_count > 0 ]] && echo -n ', ' | output
               [[ $removed_count > 0 ]] && echo -n "-$removed_count" | output
               echo '):' | output
 
@@ -133,7 +133,7 @@ jobs:
           added_count=$(comm -13 release-latest/geosite-data/all geosite-data/all | wc -l | tr -d ' ')
           removed_count=$(comm -23 release-latest/geosite-data/all geosite-data/all | wc -l | tr -d ' ')
 
-          echo -n "\n#### Sites total – $total_count (" | output
+          echo -n "\n#### Total – $total_count sites (" | output
           [[ $added_count > 0 ]] && echo -n "+$added_count" | output
           [[ $added_count > 0 && $removed_count > 0 ]] && echo -n ' / ' | output
           [[ $removed_count > 0 ]] && echo -n "-$removed_count" | output
