@@ -96,8 +96,7 @@ jobs:
         if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
         shell: bash
         run: |
-          prepend() { sed -e "s/^/$1/"; }
-          flatten() { tr '\n' ',' | sed -e 's/,$// ; s/,/, /g'; }
+          changes() { sed -e "s/^/$1/" | tr '\n' ',' | sed -e 's/,$// ; s/,/, /g'; }
           output() { tee -a RELEASE_NOTES $GITHUB_STEP_SUMMARY; }
 
           echo '\n### Release notes:' >> $GITHUB_STEP_SUMMARY
@@ -107,10 +106,10 @@ jobs:
             prev_file=release-latest/geosite-data/$name
             [ -f $prev_file ] || prev_file=/dev/null
 
-            total_count=$(wc -l $cur_file | tr -d ' ')
-            added=$(comm -13 $prev_file $cur_file | prepend '\\+ ')
+            total_count=$(echo $cur_file | wc -l | tr -d ' ')
+            added=$(comm -13 $prev_file $cur_file)
             added_count=$(echo $added | wc -l | tr -d ' ')
-            removed=$(comm -23 $prev_file $cur_file | prepend '\\- ')
+            removed=$(comm -23 $prev_file $cur_file)
             removed_count=$(echo $removed | wc -l | tr -d ' ')
 
             if [[ $added_count > 0 || $removed_count > 0 ]]   ; then
@@ -121,17 +120,19 @@ jobs:
               echo '):' | output
 
               [[ $added_count > 4 ]] \
-                && (echo $added | head -n 3 | flatten; echo ', ...') \
-                || (echo $added | flatten)
+                && (echo $added | head -n 3 | changes '\\+ '; echo ', ...') | output \
+                || echo $added | changes '\\+ ' | output
               [[ $removed_count > 4 ]] \
-                && (echo $removed | head -n 3 | flatten; echo ', ...') \
-                || (echo $removed | flatten)
+                && (echo $removed | head -n 3 | changes '\\- '; echo ', ...') | output \
+                || echo $removed | changes '\\- ' | output
             fi
           done
 
-          total_count=$(wc -l geosite-data/all | tr -d ' ')
-          added_count=$(comm -13 release-latest/geosite-data/all geosite-data/all | wc -l | tr -d ' ')
-          removed_count=$(comm -23 release-latest/geosite-data/all geosite-data/all | wc -l | tr -d ' ')
+          file=geosite-data/all
+          prev_file=release-latest/geosite-data/all; [ -f $prev_file ] || prev_file=/dev/null
+          total_count=$(echo $file | wc -l | tr -d ' ')
+          added_count=$(comm -13 $prev_file $file | wc -l | tr -d ' ')
+          removed_count=$(comm -23 $prev_file $file | wc -l | tr -d ' ')
 
           echo -n "\n#### Total – $total_count sites (" | output
           [[ $added_count > 0 ]] && echo -n "+$added_count" | output
