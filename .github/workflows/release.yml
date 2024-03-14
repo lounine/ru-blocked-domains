@@ -63,10 +63,8 @@ jobs:
         working-directory: geosite-builder
         run: go run . -datapath '../geosite-data' --outputname 'ru-blocked.dat' --outputdir '../release'
 
-      - name: Zip files
-        run: |
-          zip -9 --junk-paths release/ru-blocked.dat.zip release/ru-blocked.dat
-          zip -9 --recurse-paths release/src-data.zip src/ geosite-data/
+      - name: Zip source files
+        run: zip -9 --recurse-paths release/src-data.zip src/ geosite-data/
 
       - name: Calculate checksums
         working-directory: release
@@ -121,13 +119,13 @@ jobs:
               echo "):**" | output
 
               if (( $added_count > 0 )); then
-                echo -n "\+ "
+                echo -n "\+ " | output
                 (( $added_count > 4 )) \
                   && (echo "$added" | head -n 3 | list; echo ", ...") | output \
                   || echo "$added" | list | output
               fi
               if (( $removed_count > 0 )); then
-                echo -n "\- "
+                echo -n "\- " | output
                 (( $removed_count > 4 )) \
                   && (echo "$removed" | head -n 3 | list; echo ", ...") | output \
                   || echo "$removed" | list | output
