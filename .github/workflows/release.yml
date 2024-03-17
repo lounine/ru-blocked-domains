@@ -125,7 +125,7 @@ jobs:
             removed=$(comm -23 $pre_file $cur_file)
             removed_count=$(echo "$removed" | wc -w | tr -d ' ')
 
-            if (( $added_count = 0 && $removed_count = 0 )); then
+            if (( $added_count == 0 && $removed_count == 0 )); then
               echo "**$name – $total_count sites**" | output
             else
               echo | output
