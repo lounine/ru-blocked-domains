@@ -97,17 +97,32 @@ jobs:
           list() { tr '\n' ',' | sed -e 's/,$// ; s/,/, /g'; }
           output() { tee -a RELEASE_NOTES $GITHUB_STEP_SUMMARY; }
 
-          (echo; echo '### Release notes:') >> $GITHUB_STEP_SUMMARY
           [ -d release-latest ] && (cd release-latest; unzip src-data.zip)
+
+          cur_all=geosite-data/all
+          pre_all=release-latest/geosite-data/all; [ -f $pre_all ] || pre_all=/dev/null
+          total_count=$(cat $cur_all | wc -w | tr -d ' ')
+          added_count=$(comm -13 $pre_all $cur_all | wc -w | tr -d ' ')
+          removed_count=$(comm -23 $pre_all $cur_all | wc -w | tr -d ' ')
+
+          echo -n "### Includes $total_count unique sites" | output
+          if (( $added_count > 0 || $removed_count > 0 )); then
+            echo -n " (" | output
+            [[ $added_count > 0 ]] && echo -n "+$added_count" | output
+            [[ $added_count > 0 && $removed_count > 0 ]] && echo -n ", " | output
+            [[ $removed_count > 0 ]] && echo -n "-$removed_count" | output
+            echo ")" | output
+          fi
+
           for cur_file in $(GLOBIGNORE=*/all*; echo geosite-data/*); do
             name=$(basename $cur_file)
-            prev_file=release-latest/geosite-data/$name
-            [ -f $prev_file ] || prev_file=/dev/null
+            pre_file=release-latest/geosite-data/$name
+            [ -f $pre_file ] || pre_file=/dev/null
 
             total_count=$(cat $cur_file | wc -w | tr -d ' ')
-            added=$(comm -13 $prev_file $cur_file)
+            added=$(comm -13 $pre_file $cur_file)
             added_count=$(echo "$added" | wc -w | tr -d ' ')
-            removed=$(comm -23 $prev_file $cur_file)
+            removed=$(comm -23 $pre_file $cur_file)
             removed_count=$(echo "$removed" | wc -w | tr -d ' ')
 
             (echo; echo -n "**$name – $total_count sites**") | output
@@ -132,21 +147,6 @@ jobs:
               fi
             fi
           done
-
-          file=geosite-data/all
-          prev_file=release-latest/geosite-data/all; [ -f $prev_file ] || prev_file=/dev/null
-          total_count=$(cat $file | wc -w | tr -d ' ')
-          added_count=$(comm -13 $prev_file $file | wc -w | tr -d ' ')
-          removed_count=$(comm -23 $prev_file $file | wc -w | tr -d ' ')
-
-          (echo; echo -n "**Total – $total_count unique sites**") | output
-          if (( $added_count > 0 || $removed_count > 0 )); then
-            echo -n " **(" | output
-            [[ $added_count > 0 ]] && echo -n "+$added_count" | output
-            [[ $added_count > 0 && $removed_count > 0 ]] && echo -n ", " | output
-            [[ $removed_count > 0 ]] && echo -n "-$removed_count" | output
-            echo ")**" | output
-          fi
           
       - name: Release
         if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
