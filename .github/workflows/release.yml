@@ -122,13 +122,13 @@ jobs:
                 echo -n "\+ " | output
                 (( $added_count > 4 )) \
                   && (echo "$added" | head -n 3 | list; echo ", ...") | output \
-                  || echo "$added" | list | output
+                  || (echo "$added" | list; echo) | output
               fi
               if (( $removed_count > 0 )); then
                 echo -n "\- " | output
                 (( $removed_count > 4 )) \
                   && (echo "$removed" | head -n 3 | list; echo ", ...") | output \
-                  || echo "$removed" | list | output
+                  || (echo "$removed" | list; echo) | output
               fi
             fi
           done
