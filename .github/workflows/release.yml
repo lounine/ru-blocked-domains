@@ -125,9 +125,11 @@ jobs:
             removed=$(comm -23 $pre_file $cur_file)
             removed_count=$(echo "$removed" | wc -w | tr -d ' ')
 
-            (echo; echo -n "**$name – $total_count sites**") | output
-            if (( $added_count > 0 || $removed_count > 0 )); then
-              echo -n " **(" | output
+            if (( $added_count = 0 && $removed_count = 0 )); then
+              echo "**$name – $total_count sites**" | output
+            else
+              echo | output
+              echo -n "**$name – $total_count sites** **(" | output
               (( $added_count > 0 )) && echo -n "+$added_count" | output
               (( $added_count > 0 && $removed_count > 0 )) && echo -n ", " | output
               (( $removed_count > 0 )) && echo -n "-$removed_count" | output
@@ -145,6 +147,8 @@ jobs:
                   && (echo "$removed" | head -n 3 | list; echo ", ...") | output \
                   || (echo "$removed" | list; echo) | output
               fi
+
+              echo | output
             fi
           done
           
