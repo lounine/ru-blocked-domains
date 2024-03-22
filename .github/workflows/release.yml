@@ -15,10 +15,13 @@ jobs:
       contents: write
 
     steps:
-      - name: Set variables when running on schedule
+      - name: Set variables
         run: |
           echo "RELEASE_NAME=Released on $(date '+%Y-%m-%d')" >> $GITHUB_ENV
           echo "TAG_NAME=$(date '+%Y%m%d')" >> $GITHUB_ENV
+
+      - name: Checkout codebase
+        uses: actions/checkout@v4
     
       - name: Checkout V2Ray/XRay domain list builder
         uses: actions/checkout@v4
@@ -39,8 +42,11 @@ jobs:
           cache-dependency-path: geosite-builder/go.sum
 
       - name: Prepare working directories
+        run: mkdir src geosite-data release
+
+      - name: Copy files
         run: |
-          mkdir src geosite-data release
+          cp *.sh release/
           cp itdoginfo-domains/src/Russia-domains-inside.lst src/itdoginfo-inside.lst
           cp itdoginfo-domains/src/Russia-domains-outside.lst src/itdoginfo-outside.lst
 
@@ -81,7 +87,7 @@ jobs:
       - name: Check for changes
         id: check-for-changes
         run: |
-          for file in release/*.dat.sha256sum; do
+          for file in release/*.dat.sha256sum release/*.sh.sha256sum; do
             if ! cmp $file release-latest/$(basename $file)    ; then
               echo '### Changes found, releasing! :rocket:' >> $GITHUB_STEP_SUMMARY
               echo 'HAS_CHANGES=true' >> $GITHUB_OUTPUT
