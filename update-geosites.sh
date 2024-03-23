@@ -1,10 +1,13 @@
 #! /bin/bash
 
+errcho() { >&2 echo "Error: $@"; }
+errxit() { errcho "$@"; exit 1; }
+
 while test $# -gt 0
 do case "$1" in
     -s|--service-name )       shift; service_name=$1 ;;
     -g|--geosite-location )   shift; geosite_location=$(realpath "$1") ;;
-    * )                       echo "Error: bad option $1"; exit ;;
+    * )                       errxit "Bad option $1" ;;
 esac; shift; done
 
 
@@ -17,7 +20,7 @@ if [ -z "$service_name" ]; then
     fi
   done
 fi
-[ -z "$service_name" ] && { echo "Error: no xray/v2ray service found or provided"; exit 1; }
+[ -z "$service_name" ] && errxit "No xray/v2ray service found or provided"
 
 if [ -z "$geosite_location" ]; then
   for location in "/usr/share/$service_name" "/usr/local/share/$service_name"; do
@@ -28,8 +31,17 @@ if [ -z "$geosite_location" ]; then
     fi
   done
 fi
-[ -z "$geosite_location" ] && { echo "Error: no xray/v2ray geosite location found or provided"; exit 1; }
-[ -d "$geosite_location" ] || { echo "Invalid geosite location: $geosite_location"; exit 1; }
+[ -z "$geosite_location" ] && errxit "No xray/v2ray geosite location found or provided"
+[ -d "$geosite_location" ] || errxit "Invalid geosite location '$geosite_location'"
+
+temp_dir=''
+function cleanup_temp_dir { rm -rf "$temp_dir"; temp_dir=''; }
+function create_temp_dir {
+  [ -n "$temp_dir" ] && return
+  temp_dir=$(mktemp -d)
+  [ -d "$temp_dir" ] || errxit "Failed to create temp directory"
+  trap cleanup_temp_dir EXIT
+}
 
 release_url='https://github.com/lounine/ru-blocked-domains/releases/latest/download/'
 
@@ -40,18 +52,14 @@ if echo "$sha256sum" | sha256sum --check >/dev/null 2>&1; then
   echo "Geosite file is up to date"; exit 0
 fi
 
-temp_dir=$(mktemp -d)
-[ -d "$temp_dir" ] || { echo "Error: failed to create temp directory"; exit 1; }
-function cleanup { rm -rf "$temp_dir"; }; trap cleanup EXIT
-
 echo "Downloading new geosite file"
-cd "$temp_dir"
+create_temp_dir; cd "$temp_dir"
 if ! curl --location --fail --no-progress-meter --remote-name "$release_url/ru-blocked.dat"; then
-  echo "Error: failed to download geosite file"; exit 1
+  errxit "Failed to download geosite file"
 fi
 
 if ! echo "$sha256sum" | sha256sum --check --quiet; then
-  echo "Error: downloaded file checksum mismatch"; exit 1
+  errxit "Downloaded file checksum mismatch"
 fi
 
 if systemctl is-active $service_name; then
@@ -63,7 +71,7 @@ fi
 echo "Updating geosite file"
 cp "ru-blocked.dat" "$geosite_location/ru-blocked.dat"
 
-if do_restart; then
+if $do_restart; then
   echo "Restarting $service_name service"
   systemctl start $service_name
 fi
