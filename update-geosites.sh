@@ -35,13 +35,27 @@ fi
 [ -d "$geosite_location" ] || errxit "Invalid geosite location '$geosite_location'"
 
 temp_dir=''
-function cleanup_temp_dir { rm -rf "$temp_dir"; temp_dir=''; }
+function cleanup_temp_dir { 
+  [ -z "$temp_dir" ] && return
+  rm -rf "$temp_dir"
+  temp_dir=''
+}
 function create_temp_dir {
   [ -n "$temp_dir" ] && return
   temp_dir=$(mktemp -d)
   [ -d "$temp_dir" ] || errxit "Failed to create temp directory"
-  trap cleanup_temp_dir EXIT
 }
+
+function restart_service() {
+  if [ "$service_restart_needed" = true ]; then
+    echo "Restarting $service_name service"
+    systemctl start $service_name
+    service_restart_needed=false
+  fi
+}
+
+function clean_up { cleanup_temp_dir; restart_service; }
+trap clean_up EXIT
 
 release_url='https://github.com/lounine/ru-blocked-domains/releases/latest/download/'
 
@@ -65,13 +79,8 @@ fi
 if systemctl is-active $service_name; then
   echo "Stopping $service_name service"
   systemctl stop $service_name
-  do_restart=true
+  service_restart_needed=true
 fi
 
 echo "Updating geosite file"
 cp "ru-blocked.dat" "$geosite_location/ru-blocked.dat"
-
-if $do_restart; then
-  echo "Restarting $service_name service"
-  systemctl start $service_name
-fi
