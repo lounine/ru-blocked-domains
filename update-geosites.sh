@@ -35,23 +35,22 @@ fi
 [ -d "$geosite_location" ] || errxit "Invalid geosite location '$geosite_location'"
 
 temp_dir=''
-function cleanup_temp_dir { 
-  [ -z "$temp_dir" ] && return
-  rm -rf "$temp_dir"
-  temp_dir=''
-}
 function create_temp_dir {
-  [ -n "$temp_dir" ] && return
+  [ -d "$temp_dir" ] && return
   temp_dir=$(mktemp -d)
   [ -d "$temp_dir" ] || errxit "Failed to create temp directory"
 }
+function cleanup_temp_dir { 
+  rm -rf "$temp_dir"
+  temp_dir=''
+}
 
+service_restart_needed=false
 function restart_service() {
-  if [ "$service_restart_needed" = true ]; then
-    echo "Restarting $service_name service"
-    systemctl start $service_name
-    service_restart_needed=false
-  fi
+  $service_restart_needed || return
+  echo "Restarting $service_name service"
+  systemctl start $service_name
+  service_restart_needed=false
 }
 
 function clean_up { cleanup_temp_dir; restart_service; }
