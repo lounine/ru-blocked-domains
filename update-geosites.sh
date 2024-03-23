@@ -35,17 +35,27 @@ fi
 [ -d "$geosite_location" ] || errxit "Invalid geosite location '$geosite_location'"
 
 temp_dir=''
+
 function create_temp_dir {
   [ -d "$temp_dir" ] && return
   temp_dir=$(mktemp -d)
   [ -d "$temp_dir" ] || errxit "Failed to create temp directory"
 }
+
 function cleanup_temp_dir { 
   rm -rf "$temp_dir"
   temp_dir=''
 }
 
 service_restart_needed=false
+
+function stop_service() {
+  systemctl is-active $service_name || return
+  echo "Stopping $service_name service"
+  systemctl stop $service_name
+  service_restart_needed=true
+}
+
 function restart_service() {
   $service_restart_needed || return
   echo "Restarting $service_name service"
@@ -56,30 +66,37 @@ function restart_service() {
 function clean_up { cleanup_temp_dir; restart_service; }
 trap clean_up EXIT
 
-release_url='https://github.com/lounine/ru-blocked-domains/releases/latest/download/'
+function download_if_changed() {
+  file_url="https://github.com/$1/releases/latest/download/$2"
 
-sha256sum=$(curl --location --fail --no-progress-meter "$release_url/ru-blocked.dat.sha256sum")
+  sha256sum=$(curl --location --fail --no-progress-meter "${file_url}.sha256sum")
 
-cd "$geosite_location"
-if echo "$sha256sum" | sha256sum --check >/dev/null 2>&1; then
-  echo "Geosite file is up to date"; exit 0
+  cd "$geosite_location"
+  if echo "$sha256sum" | sha256sum --check >/dev/null 2>&1; then
+    echo "Geosite file '$2' is up to date"; return
+  fi
+
+  create_temp_dir; cd "$temp_dir"
+
+  echo "Downloading file '$2' from '$1' latest release"
+  if ! curl --location --fail --no-progress-meter --remote-name "$file_url"; then
+    errxit "Failed to download '$file_url'"
+  fi
+
+  if ! echo "$sha256sum" | sha256sum --check --quiet; then
+    errxit "Downloaded file '$2' checksum mismatch"
+  fi
+}
+
+download_if_changed 'v2fly/geoip' 'geoip.dat'
+download_if_changed 'v2fly/domain-list-community' 'dlc.dat'
+download_if_changed 'lounine/ru-blocked-domains' 'ru-blocked.dat'
+
+if compgen -G "$temp_dir/*.dat" > /dev/null; then
+  stop_service
+  for downloaded_file in "$temp_dir"/*.dat; do
+    file=$(basename "$downloaded_file")
+    echo "Updating geosite file '$file'"
+    cp "$downloaded_file" "$geosite_location/$file"
+  done
 fi
-
-echo "Downloading new geosite file"
-create_temp_dir; cd "$temp_dir"
-if ! curl --location --fail --no-progress-meter --remote-name "$release_url/ru-blocked.dat"; then
-  errxit "Failed to download geosite file"
-fi
-
-if ! echo "$sha256sum" | sha256sum --check --quiet; then
-  errxit "Downloaded file checksum mismatch"
-fi
-
-if systemctl is-active $service_name; then
-  echo "Stopping $service_name service"
-  systemctl stop $service_name
-  service_restart_needed=true
-fi
-
-echo "Updating geosite file"
-cp "ru-blocked.dat" "$geosite_location/ru-blocked.dat"
