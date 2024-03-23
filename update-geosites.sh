@@ -1,7 +1,7 @@
 #! /bin/bash
 
-errcho() { >&2 echo "Error: $@"; }
-errxit() { errcho "$@"; exit 1; }
+function errcho { >&2 echo "Error: $@"; }
+function errxit { errcho "$@"; exit 1; }
 
 while test $# -gt 0
 do case "$1" in
@@ -49,43 +49,44 @@ function cleanup_temp_dir {
 
 service_restart_needed=false
 
-function stop_service() {
+function stop_service {
   systemctl is-active $service_name || return
   echo "Stopping $service_name service"
   systemctl stop $service_name
   service_restart_needed=true
 }
 
-function restart_service() {
+function restart_service {
   $service_restart_needed || return
   echo "Restarting $service_name service"
   systemctl start $service_name
   service_restart_needed=false
 }
 
+function download {
+  curl --location --fail --no-progress-meter --retry 3 --max-time 15 "$@" || errxit "Failed to download '${@: -1}'"
+}
+
 function clean_up { cleanup_temp_dir; restart_service; }
 trap clean_up EXIT
 
-function download_if_changed() {
+function download_if_changed {
   file_url="https://github.com/$1/releases/latest/download/$2"
 
-  sha256sum=$(curl --location --fail --no-progress-meter "${file_url}.sha256sum")
+  sha256sum=$(download "${file_url}.sha256sum") || exit 1
 
   cd "$geosite_location"
   if echo "$sha256sum" | sha256sum --check >/dev/null 2>&1; then
-    echo "Geosite file '$2' is up to date"; return
+    echo "Geosite file '$2' is up to date"
+    return
   fi
 
   create_temp_dir; cd "$temp_dir"
 
   echo "Downloading file '$2' from '$1' latest release"
-  if ! curl --location --fail --no-progress-meter --remote-name "$file_url"; then
-    errxit "Failed to download '$file_url'"
-  fi
+  download --remote-name "$file_url"
 
-  if ! echo "$sha256sum" | sha256sum --check --quiet; then
-    errxit "Downloaded file '$2' checksum mismatch"
-  fi
+  echo "$sha256sum" | sha256sum --check --quiet || errxit "Downloaded file '$2' checksum mismatch"
 }
 
 download_if_changed 'v2fly/geoip' 'geoip.dat'
