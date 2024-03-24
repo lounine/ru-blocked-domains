@@ -16,3 +16,8 @@ curl -fsSL 'https://github.com/lounine/ru-blocked-domains/releases/latest/downlo
 sudo curl -fsSL 'https://github.com/lounine/ru-blocked-domains/releases/latest/download/update-geosites.sh' \
   | sudo install /dev/stdin /etc/cron.daily/update-geosites
 ```
+
+И при необходимости обновить немедленно:
+```
+sudo /etc/cron.daily/update-geosites
+```
