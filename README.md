@@ -12,5 +12,7 @@ curl -fsSL 'https://github.com/lounine/ru-blocked-domains/releases/latest/downlo
 ```
 
 #### Настроить автоматическое ежедневное обновление списков доменов:
+```bash
 sudo curl -fsSL 'https://github.com/lounine/ru-blocked-domains/releases/latest/download/update-geosites.sh' \
   | sudo install /dev/stdin /etc/cron.daily/update-geosites
+```
