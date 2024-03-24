@@ -31,7 +31,7 @@ if [ -z "$geosite_location" ]; then
     fi
   done
 fi
-[ -z "$geosite_location" ] && errxit "No xray/v2ray geosite location found or provided"
+[ -z "$geosite_location" ] && errxit "No $service_name geosite location found or provided"
 [ -d "$geosite_location" ] || errxit "Invalid geosite location '$geosite_location'"
 
 temp_dir=''
@@ -50,7 +50,7 @@ function cleanup_temp_dir {
 service_restart_needed=false
 
 function stop_service {
-  systemctl is-active $service_name || return
+  systemctl is-active --quiet $service_name || return
   echo "Stopping $service_name service"
   systemctl stop $service_name
   service_restart_needed=true
@@ -64,40 +64,46 @@ function restart_service {
 }
 
 function download {
-  curl --location --fail --no-progress-meter --retry 3 --max-time 15 "$@" || errxit "Failed to download '${@: -1}'"
+  curl --location --fail --silent --show-error --retry 3 --max-time 15 "$@" || errxit "Failed to download '${@: -1}'"
 }
 
 function clean_up { cleanup_temp_dir; restart_service; }
 trap clean_up EXIT
 
 function download_if_changed {
-  file_url="https://github.com/$1/releases/latest/download/$2"
+  repo=$1
+  file=$2
+  name=${3:-$2}
 
+  file_url="https://github.com/$repo/releases/latest/download/$file"
+
+  echo "Downloading '$name' checksum from '$repo' latest release"
   sha256sum=$(download "${file_url}.sha256sum") || exit 1
+  sha256sum=${sha256sum/$file/$name}
 
   cd "$geosite_location"
   if echo "$sha256sum" | sha256sum --check >/dev/null 2>&1; then
-    echo "Geosite file '$2' is up to date"
+    echo "File '$name' is already up to date"
     return
   fi
 
   create_temp_dir; cd "$temp_dir"
 
-  echo "Downloading file '$2' from '$1' latest release"
-  download --remote-name "$file_url"
+  echo "Downloading '$name' from '$repo' latest release"
+  download --output "$name" "$file_url"
 
-  echo "$sha256sum" | sha256sum --check --quiet || errxit "Downloaded file '$2' checksum mismatch"
+  echo "$sha256sum" | sha256sum --check --quiet || errxit "Downloaded file '$name' checksum mismatch"
 }
 
 download_if_changed 'v2fly/geoip' 'geoip.dat'
-download_if_changed 'v2fly/domain-list-community' 'dlc.dat'
+download_if_changed 'v2fly/domain-list-community' 'dlc.dat' 'geosite.dat'
 download_if_changed 'lounine/ru-blocked-domains' 'ru-blocked.dat'
 
 if compgen -G "$temp_dir/*.dat" > /dev/null; then
   stop_service
   for downloaded_file in "$temp_dir"/*.dat; do
     file=$(basename "$downloaded_file")
-    echo "Updating geosite file '$file'"
+    echo "Updating file '$file'"
     cp "$downloaded_file" "$geosite_location/$file"
   done
 fi
