@@ -104,6 +104,7 @@ if compgen -G "$temp_dir/*.dat" > /dev/null; then
   for downloaded_file in "$temp_dir"/*.dat; do
     file=$(basename "$downloaded_file")
     echo "Updating file '$file'"
+    [ -f "$geosite_location/$file" ] && cp "$geosite_location/$file" "$geosite_location/$file.bak"
     cp "$downloaded_file" "$geosite_location/$file"
   done
 fi
