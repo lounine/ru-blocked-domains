@@ -41,7 +41,7 @@ curl -fsSL 'https://github.com/lounine/ru-blocked-domains/releases/latest/downlo
 
 Скачать скрипт и установить его в cron для ежедневного запуска:
 ```bash
-sudo curl -fsSL 'https://github.com/lounine/ru-blocked-domains/releases/latest/download/update-geosites.sh' \
+curl -fsSL 'https://github.com/lounine/ru-blocked-domains/releases/latest/download/update-geosites.sh' \
   | sudo install /dev/stdin /etc/cron.daily/update-geosites
 ```
 
