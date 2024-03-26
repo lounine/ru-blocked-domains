@@ -53,7 +53,7 @@ jobs:
       - name: Download antifilter community domains list
         run: |
           curl "$ANTIFILTER_URL" --output 'src/antifilter-community.lst' \
-            --location --fail --no-progress-meter 
+            --location --fail --silent --show-error --retry 3 --max-time 15
 
       - name: Prepare V2Ray/XRay domain lists
         run: |

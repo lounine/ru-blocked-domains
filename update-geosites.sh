@@ -64,7 +64,7 @@ function restart_service {
 }
 
 function download {
-  curl --location --fail --silent --show-error --retry 3 --max-time 15 "$@" || errxit "Failed to download '${@: -1}'"
+  curl "$@" --location --fail --silent --show-error --retry 3 --max-time 15 || errxit "Failed to download '${@: -1}'"
 }
 
 function clean_up { cleanup_temp_dir; restart_service; }
