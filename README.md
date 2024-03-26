@@ -45,6 +45,11 @@ curl -fsSL 'https://github.com/lounine/ru-blocked-domains/releases/latest/downlo
   | sudo install /dev/stdin /etc/cron.daily/update-geosites
 ```
 
+и при необходимости запустить немедленно:
+```
+sudo /etc/cron.daily/update-geosites
+```
+
 ## Использование
 
 ### Конфигурация v2ray / xray
