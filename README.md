@@ -32,12 +32,13 @@ curl -fsSL 'https://github.com/lounine/ru-blocked-domains/releases/latest/downlo
 
 ### Настройка периодического обновления доменов
 Для ежедневного обновления списков предлагается запускать тот же скрипт через cron. Релиз собирается к 21:00 UTC (00:00 MSK), а cron.daily запускается на большинстве систем около 6:00 - 7:00, и  как раз подхватит последнюю версию.
+Скачать скрипт и установить его в cron для ежедневного запуска:
 ```bash
 sudo curl -fsSL 'https://github.com/lounine/ru-blocked-domains/releases/latest/download/update-geosites.sh' \
   | sudo install /dev/stdin /etc/cron.daily/update-geosites
 ```
 
-И при необходимости обновить немедленно:
+и при необходимости запустить немедленно:
 ```
 sudo /etc/cron.daily/update-geosites
 ```
