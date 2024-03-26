@@ -14,7 +14,8 @@
 ### Вручную
 Скачать файл ru-blocked.dat из последнего релиза и поместить его в папку `/usr/share/xray`, `/usr/share/v2ray`, `/usr/local/share/xray` или `/usr/local/share/v2ray`, в зависимости от места установки xray/v2ray.
 
-### Скачать и обновить все списки доменов до последней версии:
+### Автоматически
+В релиз включён скрипт **update-geosites.sh**. Скрипт скачает и обновит файл **ru-blocked.dat** из этого репозитория, а также **geoip.dat** и **geosite.dat** из дистрибутива xray/v2ray до последних версий. Скачать и запустить скрипт:
 ```bash
 curl -fsSL 'https://github.com/lounine/ru-blocked-domains/releases/latest/download/update-geosites.sh' \
   | sudo bash
@@ -27,8 +28,8 @@ curl -fsSL 'https://github.com/lounine/ru-blocked-domains/releases/latest/downlo
   | sudo bash -s -- -g /some/other/location/
 ```
 
-### Настройка автоматического обновление списков доменов
-Для автоматического ежедневного обновления списков предлагается запускать тот же скрипт через cron. Релиз собирается к 21:00 UTC (00:00 MSK), а cron.daily запускается на большинстве систем около 6:00 - 7:00, и  как раз подхватит последнюю версию.
+### Настройка периодического обновление списков доменов
+Для ежедневного обновления списков предлагается запускать тот же скрипт через cron. Релиз собирается к 21:00 UTC (00:00 MSK), а cron.daily запускается на большинстве систем около 6:00 - 7:00, и  как раз подхватит последнюю версию.
 ```bash
 sudo curl -fsSL 'https://github.com/lounine/ru-blocked-domains/releases/latest/download/update-geosites.sh' \
   | sudo install /dev/stdin /etc/cron.daily/update-geosites
