@@ -12,7 +12,7 @@
 ## Установка
 
 ### Вручную
-Скачать файл ru-blocked.dat из последнего релиза и поместить его в папку `/usr/share/xray`, `/usr/share/v2ray`, `/usr/local/share/xray` или `/usr/local/share/v2ray`, в зависимости от места установки xray/v2ray.
+Скачать файл **ru-blocked.dat** из последнего релиза и поместить его в папку `/usr/share/xray`, `/usr/share/v2ray`, `/usr/local/share/xray` или `/usr/local/share/v2ray`, в зависимости от места установки xray/v2ray.
 
 ### Автоматически
 В релиз включён скрипт **update-geosites.sh**. Скрипт скачает и обновит файл **ru-blocked.dat** из этого репозитория, а также **geoip.dat** и **geosite.dat** из дистрибутива xray/v2ray до последних версий. Скачать и запустить скрипт:
