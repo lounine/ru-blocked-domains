@@ -53,7 +53,7 @@ sudo /etc/cron.daily/update-geosites
 ## Использование
 
 ### Конфигурация v2ray / xray
-Пример обращения к спискам доменов в настройке маршрутизации:
+Пример обращения к спискам доменов в настройке маршрутизации v2ray/xray (см. [документацию v2ray](https://www.v2ray.com/ru/configuration/routing.html)):
 ```
 "routing": {
   "rules": [
