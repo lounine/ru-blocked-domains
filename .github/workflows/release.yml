@@ -91,7 +91,6 @@ jobs:
 
       - name: Prepare release notes
         if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
-        shell: bash
         run: |
           [ -d release-latest ] && (cd release-latest; unzip src-data.zip);
           build/release-notes release-latest/geosite-data geosite-data RELEASE_NOTES $GITHUB_STEP_SUMMARY

@@ -1,10 +1,14 @@
 #! /bin/bash
 
-list() { tr '\n' ',' | sed -e 's/,$// ; s/,/, /g'; }
-output() { tee -a $3 $4; }
+PREV_DATA_LOCATION="$1"
+CUR_DATA_LOCATION="$2"
+OUTPUT="${@:3}"
 
-cur_all=$2/all
-pre_all=$1/all; [ -f $pre_all ] || pre_all=/dev/null
+list() { tr '\n' ',' | sed -e 's/,$// ; s/,/, /g'; }
+output() { tee -a $OUTPUT; }
+
+cur_all="$CUR_DATA_LOCATION"/all
+pre_all="$PREV_DATA_LOCATION"/all; [ -f $pre_all ] || pre_all=/dev/null
 total_count=$(cat $cur_all | wc -w | tr -d ' ')
 added_count=$(comm -13 $pre_all $cur_all | wc -w | tr -d ' ')
 removed_count=$(comm -23 $pre_all $cur_all | wc -w | tr -d ' ')
