@@ -63,7 +63,7 @@ jobs:
         run: go run . -datapath '../geosite-data' --outputname 'ru-blocked.dat' --outputdir '../release'
         
       - name: Build Shadowrocket et al. configs
-        run: build/configs "${{ env.RELEASE_DATE) }}" geosite-data release
+        run: build/configs "${{ env.RELEASE_DATE }}" geosite-data release
 
       - name: Calculate checksums
         working-directory: release
