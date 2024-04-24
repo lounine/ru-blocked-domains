@@ -1,9 +1,9 @@
 #! /bin/bash
 
 SRC_DIR="$1"
-DST_DIR="$2"
+DATA_DIR="$2"
 
-function process() { perl -e '
+function process { perl -e '
 {
   my %domains;
   while (<>) {
@@ -23,11 +23,11 @@ function process() { perl -e '
 
 }' | sort; }
 
-cat "$SRC_DIR"/antifilter-community.lst  | process > "$DST_DIR"/antifilter-community
-cat "$SRC_DIR"/itdoginfo-inside.lst      | process > "$DST_DIR"/itdoginfo-inside
-cat "$SRC_DIR"/itdoginfo-outside.lst     | process > "$DST_DIR"/itdoginfo-outside
-cat "$SRC_DIR"/itdoginfo-outside.lst     | process > "$DST_DIR"/all-outside
+cat "$SRC_DIR"/antifilter-community.lst  | process > "$DATA_DIR"/antifilter-community
+cat "$SRC_DIR"/itdoginfo-inside.lst      | process > "$DATA_DIR"/itdoginfo-inside
+cat "$SRC_DIR"/itdoginfo-outside.lst     | process > "$DATA_DIR"/itdoginfo-outside
+cat "$SRC_DIR"/itdoginfo-outside.lst     | process > "$DATA_DIR"/all-outside
 {
 cat "$SRC_DIR"/antifilter-community.lst
 cat "$SRC_DIR"/itdoginfo-inside.lst
-                                        } | process > "$DST_DIR"/all
+                                        } | process > "$DATA_DIR"/all

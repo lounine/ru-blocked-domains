@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Set variables
         run: |
-          echo "RELEASE_NAME=Released on $(date '+%Y-%m-%d')" >> $GITHUB_ENV
+          echo "RELEASE_DATE=$(date '+%Y-%m-%d')" >> $GITHUB_ENV
           echo "TAG_NAME=$(date '+%Y%m%d')" >> $GITHUB_ENV
 
       - name: Checkout codebase
@@ -55,19 +55,19 @@ jobs:
           curl "$ANTIFILTER_URL" --output 'src/antifilter-community.lst' \
             --location --fail --silent --show-error --retry 3 --max-time 15
 
-      - name: Prepare V2Ray/XRay domain lists
+      - name: Build integral domain lists
         run: build/geosite-data src geosite-data
 
       - name: Build V2Ray/XRay geosite file
         working-directory: geosite-builder
         run: go run . -datapath '../geosite-data' --outputname 'ru-blocked.dat' --outputdir '../release'
-
-      - name: Zip source files
-        run: zip -9 --recurse-paths release/src-data.zip src geosite-data
+        
+      - name: Build Shadowrocket et al. configs
+        run: build/configs "${{ env.RELEASE_DATE) }}" geosite-data release
 
       - name: Calculate checksums
         working-directory: release
-        run: for file in *; do sha256sum $file > $file.sha256sum; done
+        run: for file in *.dat; do sha256sum $file > $file.sha256sum; done
 
       - name: Download latest release
         uses: robinraju/release-downloader@v1.9
@@ -80,7 +80,7 @@ jobs:
       - name: Check for changes
         id: check-for-changes
         run: |
-          for file in release/*.dat.sha256sum release/*.sh.sha256sum; do
+          for file in release/*; do
             if ! cmp $file release-latest/$(basename $file)    ; then
               echo '### Changes found, releasing! :rocket:' >> $GITHUB_STEP_SUMMARY
               echo 'HAS_CHANGES=true' >> $GITHUB_OUTPUT
@@ -88,6 +88,10 @@ jobs:
             fi
           done
           echo '### No changes found, skipping release. :zzz:' >> $GITHUB_STEP_SUMMARY
+
+      - name: Zip source files
+        if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
+        run: zip -9 --recurse-paths release/src-data.zip src geosite-data
 
       - name: Prepare release notes
         if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
@@ -99,7 +103,7 @@ jobs:
         if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ env.RELEASE_NAME }}
+          name: ${{ format('Released on {0}', env.RELEASE_DATE) }}
           tag_name: ${{ env.TAG_NAME }}
           body_path: RELEASE_NOTES
           files: release/*

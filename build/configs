@@ -1,0 +1,39 @@
+#! /bin/bash
+
+RELEASE_DATE="$1"
+DATA_DIR="$2"
+RELEASE_DIR="$3"
+
+REPO_URL='https://github.com/lounine/ru-blocked-domains'
+RELEASE_URL="$REPO_URL/releases/latest/download"
+
+function write_head {
+  echo "# AUTHOR: M. Lounine"
+  echo "# REPO: $REPO_URL"
+  echo "# RELEASED: $RELEASE_DATE"
+  echo
+}
+
+function write_list {
+  write_head
+  sed 's/^/DOMAIN-SUFFIX,/'
+}
+
+function save_config {
+  local TEMPLATE="$1"
+  local CONFIG="$2"
+  local LIST="$3"
+
+  {
+    write_head
+    cat "$TEMPLATE" | sed \
+      -e "/^update-url =/s|$|$RELEASE_URL/$CONFIG|" \
+      -e $'/\[Rule\]/a\\\nRULE-SET,'"$RELEASE_URL/$LIST,PROXY"
+  } > "$RELEASE_DIR/$CONFIG"
+}
+
+cat "$DATA_DIR"/all | write_list > "$RELEASE_DIR"/proxy.lst
+cat "$DATA_DIR"/all-outside | write_list > "$RELEASE_DIR"/proxy-outside.lst
+
+save_config templates/shadowrocket.conf ru-blocked-shadowrocket.conf proxy.lst
+save_config templates/shadowrocket.conf ru-blocked-outside-shadowrocket.conf proxy-outside.lst
