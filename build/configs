@@ -14,26 +14,23 @@ function write_head {
   echo
 }
 
-function write_list {
-  write_head
-  sed 's/^/DOMAIN-SUFFIX,/'
-}
-
 function save_config {
-  local TEMPLATE="$1"
-  local CONFIG="$2"
-  local LIST="$3"
+  local TEMPLATE=$1
+  local CONFIG=$2
+  local RULES=$(cat | sed 's|^|DOMAIN-SUFFIX,|; s|$|,PROXY\\|')
 
   {
     write_head
     cat "$TEMPLATE" | sed \
-      -e "/^update-url =/s|$|$RELEASE_URL/$CONFIG|" \
-      -e $'/\[Rule\]/a\\\nRULE-SET,'"$RELEASE_URL/$LIST,PROXY"
-  } > "$RELEASE_DIR/$CONFIG"
+      -e "/^update-url[[:space:]]*=/ s|%1|$RELEASE_URL/$CONFIG|" \
+      -e $'/\[Rule\]/ a\\\n'"$RULES"
+  } > "$RELEASE_DIR/$CONFIG" 
 }
 
-cat "$DATA_DIR"/all | write_list > "$RELEASE_DIR"/proxy.lst
-cat "$DATA_DIR"/all-outside | write_list > "$RELEASE_DIR"/proxy-outside.lst
+cat "$DATA_DIR"/all | save_config \
+  templates/shadowrocket.conf \
+  ru-blocked-shadowrocket.conf
 
-save_config templates/shadowrocket.conf ru-blocked-shadowrocket.conf proxy.lst
-save_config templates/shadowrocket.conf ru-blocked-outside-shadowrocket.conf proxy-outside.lst
+cat "$DATA_DIR"/all-outside | save_config \
+  templates/shadowrocket.conf \
+  ru-blocked-outside-shadowrocket.conf
