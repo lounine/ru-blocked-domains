@@ -1,0 +1,16 @@
+#! /bin/bash
+
+CUR_RELEASE_DIR="$1"
+PREV_RELEASE_DIR="$2"
+
+function clean-up { sed '/^#/d; /^[[:space:]]*$/d'; }
+
+for file in "$CUR_RELEASE_DIR"/*.sha256sum; do
+  cmp "$file" "$PREV_RELEASE_DIR/$(basename $file)" || exit 1
+done
+
+for file in "$CUR_RELEASE_DIR"/*.sh "$CUR_RELEASE_DIR"/*.conf; do
+  file1=$(mktemp); cat "$file" | clean-up > "$file1"
+  file2=$(mktemp); cat "$PREV_RELEASE_DIR/$(basename $file)" | clean-up > "$file2"
+  cmp "$file1" "$file2" || exit 1
+done

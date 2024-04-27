@@ -42,7 +42,7 @@ jobs:
           cache-dependency-path: geosite-builder/go.sum
 
       - name: Prepare working directories
-        run: mkdir src geosite-data release
+        run: mkdir ./src ./geosite-data ./release
 
       - name: Copy files
         run: |
@@ -56,14 +56,14 @@ jobs:
             --location --fail --silent --show-error --retry 3 --max-time 15
 
       - name: Build integral domain lists
-        run: build/geosite-data src geosite-data
+        run: build/geosite-data ./src ./geosite-data
 
       - name: Build V2Ray/XRay geosite file
         working-directory: geosite-builder
         run: go run . -datapath '../geosite-data' --outputname 'ru-blocked.dat' --outputdir '../release'
         
       - name: Build Shadowrocket et al. configs
-        run: build/configs "${{ env.RELEASE_DATE }}" geosite-data release
+        run: build/configs "${{ env.RELEASE_DATE }}" ./geosite-data ./release
 
       - name: Calculate checksums
         working-directory: release
@@ -80,24 +80,22 @@ jobs:
       - name: Check for changes
         id: check-for-changes
         run: |
-          for file in release/*; do
-            if ! cmp $file release-latest/$(basename $file)    ; then
-              echo '### Changes found, releasing! :rocket:' >> $GITHUB_STEP_SUMMARY
-              echo 'HAS_CHANGES=true' >> $GITHUB_OUTPUT
-              exit 0
-            fi
-          done
-          echo '### No changes found, skipping release. :zzz:' >> $GITHUB_STEP_SUMMARY
+          if build/compare-releases ./release ./release-latest; then
+            echo '### No changes found, skipping release. :zzz:' >> $GITHUB_STEP_SUMMARY
+          else
+            echo '### Changes found, releasing! :rocket:' >> $GITHUB_STEP_SUMMARY
+            echo 'HAS_CHANGES=true' >> $GITHUB_OUTPUT
+          fi
 
       - name: Zip source files
         if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
-        run: zip -9 --recurse-paths release/src-data.zip src geosite-data
+        run: zip -9 --recurse-paths release/src-data.zip ./src ./geosite-data
 
       - name: Prepare release notes
         if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
         run: |
           [ -d release-latest ] && (cd release-latest; unzip src-data.zip);
-          build/release-notes release-latest/geosite-data geosite-data RELEASE_NOTES $GITHUB_STEP_SUMMARY
+          build/release-notes release-latest/geosite-data ./geosite-data RELEASE_NOTES $GITHUB_STEP_SUMMARY
           
       - name: Release
         if: ${{ steps.check-for-changes.outputs.HAS_CHANGES }}
