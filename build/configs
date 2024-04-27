@@ -17,7 +17,7 @@ function write_head {
 function save_config {
   local TEMPLATE=$1
   local CONFIG=$2
-  local RULES=$(cat | sed 's|^|DOMAIN-SUFFIX,|; s|$|,PROXY|')
+  local RULES=$(cat | sed 's|^|DOMAIN-SUFFIX,|; s|$|,PROXY\|')
 
   {
     write_head
