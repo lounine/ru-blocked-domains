@@ -17,13 +17,18 @@ function write_head {
 function save_config {
   local TEMPLATE=$1
   local CONFIG=$2
-  local RULES=$(cat | sed 's|^|DOMAIN-SUFFIX,|; s|$|,PROXY\|')
+
+  rules=$(mktemp)
+  echo '/\[Rule\]/ a\' >> "$rules"
+  cat | sed 's|^|DOMAIN-SUFFIX,|; s|$|,PROXY\\|' >> "$rules"
+
+  cat "$rules"
 
   {
     write_head
     cat "$TEMPLATE" | sed \
       -e "/^update-url[[:space:]]*=/ s|%1|$RELEASE_URL/$CONFIG|" \
-      -e $'/\[Rule\]/ a\\\n'"$RULES"
+      -f "$rules"
   } > "$RELEASE_DIR/$CONFIG" 
 }
 
