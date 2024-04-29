@@ -20,9 +20,7 @@ function save_config {
 
   rules=$(mktemp)
   echo '/\[Rule\]/ a\' >> "$rules"
-  cat | sed 's|^|DOMAIN-SUFFIX,|; s|$|,PROXY\\|' >> "$rules"
-
-  cat "$rules"
+  cat | sed 's|^|DOMAIN-SUFFIX,|; s|$|,PROXY|; $ !s|$|\\|' >> "$rules"
 
   {
     write_head
