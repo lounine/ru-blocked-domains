@@ -47,8 +47,8 @@ jobs:
       - name: Copy files
         run: |
           cp *.sh release/
-          cp itdoginfo-domains/src/Russia-domains-inside.lst src/itdoginfo-inside.lst
-          cp itdoginfo-domains/src/Russia-domains-outside.lst src/itdoginfo-outside.lst
+          cp itdoginfo-domains/Russia/inside-raw.lst src/itdoginfo-inside.lst
+          cp itdoginfo-domains/Russia/outside-raw.lst src/itdoginfo-outside.lst
 
       - name: Download antifilter community domains list
         run: |
