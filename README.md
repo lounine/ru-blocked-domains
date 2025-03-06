@@ -8,8 +8,8 @@
 ## Источники и структура данных
 В файл **ru-blocked.dat** попадают:
 - в раздел `antifilter-community` – все домены из списка **Community** проекта [Antifilter](https://antifilter.download)
-- в раздел `itdoginfo-inside` – все домены из списка **src/Russia-domains-inside.lst** репозитория [@itdoginfo/allow-domains](https://github.com/itdoginfo/allow-domains)
-- в раздел `itdoginfo-outside` – все домены из списка **src/Russia-domains-outside.lst** репозитория [@itdoginfo/allow-domains](https://github.com/itdoginfo/allow-domains)
+- в раздел `itdoginfo-inside` – все домены из списка **Russia/inside-raw.lst** репозитория [@itdoginfo/allow-domains](https://github.com/itdoginfo/allow-domains)
+- в раздел `itdoginfo-outside` – все домены из списка **Russia/outside-raw.lst** репозитория [@itdoginfo/allow-domains](https://github.com/itdoginfo/allow-domains)
 - в раздел `all` – все недоступные из РФ домены из всех списков выше
 - в раздел `all-outside` – все недоступные из-за пределов РФ российские домены из всех списков выше
 
